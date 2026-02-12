@@ -1,3 +1,9 @@
+# Project local files
+CLAUDE.md
+.claude/
+.kiro/
+nikki-note/
+
 # Logs
 logs
 *.log
