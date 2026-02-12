@@ -26,7 +26,7 @@ export function ImageCard({ id, src, onDelete }: ImageCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative aspect-[4/5] group cursor-grab active:cursor-grabbing touch-manipulation ${
+      className={`relative aspect-[4/5] group cursor-grab active:cursor-grabbing touch-none ${
         isDragging ? 'z-50 opacity-50' : ''
       }`}
       {...attributes}
