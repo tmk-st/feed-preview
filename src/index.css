@@ -1,3 +1,5 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant hover-device (@media (hover: hover));
+@custom-variant touch-device (@media (hover: none));
