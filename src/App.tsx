@@ -84,13 +84,11 @@ function App() {
         <div className="flex justify-center py-4 px-4">
           <UploadButton onUpload={handleUpload} />
         </div>
-        <div className="px-4 sm:px-0">
-          <ImageGrid
-            images={images}
-            onReorder={handleReorder}
-            onDelete={handleDelete}
-          />
-        </div>
+        <ImageGrid
+          images={images}
+          onReorder={handleReorder}
+          onDelete={handleDelete}
+        />
       </main>
     </div>
   )

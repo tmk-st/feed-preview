@@ -20,22 +20,24 @@ export function ImageCard({ id, src, onDelete }: ImageCardProps) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    WebkitTouchCallout: 'none' as const,
   }
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative aspect-[4/5] group cursor-grab active:cursor-grabbing touch-none ${
+      className={`relative aspect-[4/5] group cursor-grab active:cursor-grabbing touch-none select-none ${
         isDragging ? 'z-50 opacity-50' : ''
       }`}
+      onContextMenu={(e) => e.preventDefault()}
       {...attributes}
       {...listeners}
     >
       <img
         src={src}
         alt=""
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover pointer-events-none"
         draggable={false}
       />
       <button
