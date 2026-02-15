@@ -27,6 +27,7 @@ export function ImageCard({ id, src, onDelete }: ImageCardProps) {
     <div
       ref={setNodeRef}
       style={style}
+      data-image-id={id}
       className={`relative aspect-[4/5] group select-none ${
         isDragging ? 'z-50 opacity-50' : ''
       }`}

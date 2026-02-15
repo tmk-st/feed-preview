@@ -1,3 +1,4 @@
+import { useRef, useLayoutEffect } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -23,11 +24,16 @@ export interface ImageItem {
 
 interface ImageGridProps {
   images: ImageItem[]
+  offset: number
   onReorder: (images: ImageItem[]) => void
   onDelete: (id: string) => void
 }
 
-export function ImageGrid({ images, onReorder, onDelete }: ImageGridProps) {
+export function ImageGrid({ images, offset, onReorder, onDelete }: ImageGridProps) {
+  const gridRef = useRef<HTMLDivElement>(null)
+  const prevPositions = useRef<Map<string, DOMRect>>(new Map())
+  const prevOffsetRef = useRef(offset)
+
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: { distance: 5 },
@@ -39,6 +45,62 @@ export function ImageGrid({ images, onReorder, onDelete }: ImageGridProps) {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   )
+
+  // 画像が変わったら位置を記録（アニメーションなし）
+  useLayoutEffect(() => {
+    if (!gridRef.current) return
+    const positions = new Map<string, DOMRect>()
+    gridRef.current.querySelectorAll<HTMLElement>('[data-image-id]').forEach((el) => {
+      positions.set(el.dataset.imageId!, el.getBoundingClientRect())
+    })
+    prevPositions.current = positions
+  }, [images])
+
+  // offset変更時にFLIPアニメーション
+  useLayoutEffect(() => {
+    if (!gridRef.current || prevOffsetRef.current === offset) return
+    prevOffsetRef.current = offset
+    const prev = prevPositions.current
+
+    // DOM更新後の最終位置を取得
+    const newPositions = new Map<string, DOMRect>()
+    gridRef.current.querySelectorAll<HTMLElement>('[data-image-id]').forEach((el) => {
+      newPositions.set(el.dataset.imageId!, el.getBoundingClientRect())
+    })
+
+    if (prev.size > 0) {
+      const elements: { el: HTMLElement; dx: number; dy: number }[] = []
+
+      gridRef.current.querySelectorAll<HTMLElement>('[data-image-id]').forEach((el) => {
+        const id = el.dataset.imageId!
+        const oldRect = prev.get(id)
+        const newRect = newPositions.get(id)
+        if (!oldRect || !newRect) return
+        const dx = oldRect.left - newRect.left
+        const dy = oldRect.top - newRect.top
+        if (dx === 0 && dy === 0) return
+        elements.push({ el, dx, dy })
+      })
+
+      // 1. 全要素を旧位置に配置（transition無効）
+      elements.forEach(({ el, dx, dy }) => {
+        el.style.transition = 'none'
+        el.style.transform = `translate(${dx}px, ${dy}px)`
+      })
+
+      // 2. リフロー強制で旧位置を確定
+      gridRef.current.getBoundingClientRect()
+
+      // 3. 新位置へアニメーション
+      elements.forEach(({ el }) => {
+        el.style.transition = 'transform 300ms ease'
+        el.style.transform = ''
+      })
+    }
+
+    // 次回のFLIP用に最終位置を保存
+    prevPositions.current = newPositions
+  }, [offset])
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
@@ -68,7 +130,10 @@ export function ImageGrid({ images, onReorder, onDelete }: ImageGridProps) {
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={images} strategy={rectSortingStrategy}>
-        <div className="grid grid-cols-3 gap-[3px]">
+        <div ref={gridRef} className="grid grid-cols-3 gap-[3px]">
+          {Array.from({ length: offset }, (_, i) => (
+            <div key={`offset-${i}`} className="aspect-[4/5]" />
+          ))}
           {images.map((image) => (
             <ImageCard
               key={image.id}
