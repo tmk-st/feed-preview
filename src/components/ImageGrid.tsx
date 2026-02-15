@@ -23,11 +23,12 @@ export interface ImageItem {
 
 interface ImageGridProps {
   images: ImageItem[]
+  offset: number
   onReorder: (images: ImageItem[]) => void
   onDelete: (id: string) => void
 }
 
-export function ImageGrid({ images, onReorder, onDelete }: ImageGridProps) {
+export function ImageGrid({ images, offset, onReorder, onDelete }: ImageGridProps) {
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: { distance: 5 },
@@ -69,6 +70,9 @@ export function ImageGrid({ images, onReorder, onDelete }: ImageGridProps) {
     >
       <SortableContext items={images} strategy={rectSortingStrategy}>
         <div className="grid grid-cols-3 gap-[3px]">
+          {Array.from({ length: offset }, (_, i) => (
+            <div key={`offset-${i}`} className="aspect-[4/5]" />
+          ))}
           {images.map((image) => (
             <ImageCard
               key={image.id}
