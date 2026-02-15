@@ -33,7 +33,7 @@ export function ImageGrid({ images, onReorder, onDelete }: ImageGridProps) {
       activationConstraint: { distance: 5 },
     }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 250, tolerance: 8 },
+      activationConstraint: { distance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
